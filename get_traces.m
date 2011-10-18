@@ -59,8 +59,24 @@ E.trialstarts = E.trialstarts/sample.freq - E.start;
 E.trialends = load('fixpointtemp.txt');
 E.trialends = E.trialends/sample.freq - E.start;
 
-%% load some parameters
-[~,E.trialtype]=system('grep BLOCKSYNC temp.asc | awk ''{ print $4 }''');
+%% load blocks and attn task
+[~,blockstr]=system('grep BLOCKSYNC temp.asc | awk ''{ print $2, $4 }''');
+[~,attnstr]=system('grep attn temp.asc | awk ''{ print $2, $5 }''');
+
+%% parse blocks and attn
+blockstr = textscan(blockstr,'%f %s');
+E.block.t = blockstr{1};
+E.block.type = blockstr{2};
+
+if isempty(attnstr)
+    E.stim = 'CSM';
+else
+    E.stim = 'solid';
+    attnstr = textscan(attnstr,'%f %s');
+    E.attn.t = attnstr{1};
+    E.attn.str = attnstr{2};
+end
+
 
 %% clean up
 fclose('all');
@@ -68,15 +84,14 @@ fclose('all');
 %% plot it
 clf
 Yrng = [-20 20];
-subplot(3,1,1)
-plot(E.T.t,E.T.x,E.t,E.V.x)
+plot(E.T.t,E.T.x,'k:',E.t,E.V.x,'b',E.t,E.L.x,'r',E.t,E.R.x,'g')
+title([E.name ' : ' datestr(str2num(E.name))])
 ylim(Yrng)
-% subplot(3,1,2)
-% plot(E.t,E.V.x)
-% ylim(Yrng/5)
-subplot(3,1,2)
-plot(E.t,E.L.x)
-ylim(Yrng)
-subplot(3,1,3)
-plot(E.t,E.R.x)
-ylim(Yrng)
+hold on
+for idx = 1:length(E.trialstarts)
+    plot([1 1]*E.trialstarts(idx),Yrng,'g--')
+    plot([1 1]*E.trialends(idx),Yrng,'r--')
+end
+hold off
+
+
