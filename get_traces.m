@@ -25,7 +25,7 @@ end
 screen.width = 40;
 screen.dist = 100;
 screen.pixelwidth = 800;
-sample.freq = 1;
+base.freq = 1000; % data in file in ms
 
 [~,E.name,] = fileparts(filename) ;
 
@@ -36,8 +36,8 @@ frewind(fid) ;
 A = textscan(fid,'%f %f %f %f %f %f %f %f','CollectOutput', 1, 'treatAsEmpty', {'.','I','C','R'});
 
 %% calculate traces
-E.start = min(A{1,1}(1:10,1))/sample.freq;
-E.t = A{1,1}(:,1)/sample.freq - E.start;
+E.start = min(A{1,1}(1:10,1))/base.freq;
+E.t = A{1,1}(:,1)/base.freq - E.start;
 E.L.x = atand((screen.width*A{1,1}(:,2)/screen.pixelwidth)/screen.dist) - atand(screen.width/screen.dist)/2;
 E.R.x = atand((screen.width*A{1,1}(:,5)/screen.pixelwidth)/screen.dist) - atand(screen.width/screen.dist)/2;
 E.R.x = E.R.x - nanmean(E.R.x);
@@ -48,16 +48,21 @@ E.V.x = (E.R.x - E.L.x)/2;
 copyfile(['events/' filename], 'temp.asc')
 !grep FIXPOINT temp.asc  | awk '{ print $2 " " $11  }' > fixpointtemp.txt
 temp = load('fixpointtemp.txt');
-E.T.t = temp(:,1)/sample.freq - E.start;
+E.T.t = temp(:,1)/base.freq - E.start;
 E.T.x = atand((screen.width*temp(:,2)/screen.pixelwidth)/screen.dist) - atand(screen.width/screen.dist)/2;
 E.T.x = E.T.x - nanmean(E.T.x);
 
 !grep TRIALID temp.asc  | awk '{ print $2 }' > fixpointtemp.txt
 E.trialstarts = load('fixpointtemp.txt');
-E.trialstarts = E.trialstarts/sample.freq - E.start;
+E.trialstarts = E.trialstarts/base.freq - E.start;
 !grep TRIAL_RESULT temp.asc  | awk '{ print $2 }' > fixpointtemp.txt
 E.trialends = load('fixpointtemp.txt');
-E.trialends = E.trialends/sample.freq - E.start;
+E.trialends = E.trialends/base.freq - E.start;
+
+%% smooth data
+E.L.sx = smooth(E.L.x,100,'moving');
+E.R.sx = smooth(E.R.x,100,'moving');
+E.V.sx = (E.R.sx - E.L.sx)/2;
 
 %% load blocks and attn task
 [~,blockstr]=system('grep BLOCKSYNC temp.asc | awk ''{ print $2, $4 }''');
@@ -65,7 +70,7 @@ E.trialends = E.trialends/sample.freq - E.start;
 
 %% parse blocks and attn
 blockstr = textscan(blockstr,'%f %s');
-E.block.t = blockstr{1};
+E.block.t = blockstr{1}/base.freq - E.start;
 E.block.type = blockstr{2};
 
 if isempty(attnstr)
@@ -82,16 +87,7 @@ end
 fclose('all');
 
 %% plot it
-clf
-Yrng = [-20 20];
-plot(E.T.t,E.T.x,'k:',E.t,E.V.x,'b',E.t,E.L.x,'r',E.t,E.R.x,'g')
-title([E.name ' : ' datestr(str2num(E.name))])
-ylim(Yrng)
-hold on
-for idx = 1:length(E.trialstarts)
-    plot([1 1]*E.trialstarts(idx),Yrng,'g--')
-    plot([1 1]*E.trialends(idx),Yrng,'r--')
-end
-hold off
+plot_traces(E)
 
-
+%% save the data
+save(['mats/' E.name '.mat'],'E')
