@@ -33,7 +33,7 @@ base.freq = 1000; % data in file in ms
 samplefilename = ['samples/' filename];
 fid = fopen(samplefilename);
 frewind(fid) ; 
-A = textscan(fid,'%f %f %f %f %f %f %f %f','CollectOutput', 1, 'treatAsEmpty', {'.','I','C','R'});
+A = textscan(fid,'%f %f %f %f %f %f %f %s','CollectOutput', 1, 'treatAsEmpty', {'.','I','C','R'});
 
 %% calculate traces
 E.start = min(A{1,1}(1:10,1))/base.freq;
@@ -58,11 +58,6 @@ E.trialstarts = E.trialstarts/base.freq - E.start;
 !grep TRIAL_RESULT temp.asc  | awk '{ print $2 }' > fixpointtemp.txt
 E.trialends = load('fixpointtemp.txt');
 E.trialends = E.trialends/base.freq - E.start;
-
-%% smooth data
-E.L.sx = smooth(E.L.x,100,'moving');
-E.R.sx = smooth(E.R.x,100,'moving');
-E.V.sx = (E.R.sx - E.L.sx)/2;
 
 %% load blocks and attn task
 [~,blockstr]=system('grep BLOCKSYNC temp.asc | awk ''{ print $2, $4 }''');
