@@ -99,12 +99,13 @@ for idx = 1:length(Efull.block.type)
     title(blocktype)
 end
 
-
+%% print results
+fprintf('run_name\ttype\tmeanRMS\tmeanR\tmeanP\n');
 for idx = 1:length(blocktypes)
     blocktype = blocktypes{idx};
-    disp(blocktype)
-    disp(results.(blocktype).idx)
-    disp(mean(results.(blocktype).rms))
-    disp(results.(blocktype).r)
-    disp(results.(blocktype).p)
+    meanrms = mean(results.(blocktype).rms);
+    meanR = mean(abs(results.(blocktype).r));
+    meanP = mean(results.(blocktype).p);
+    fprintf('%s\t%s\t%.3f\t%.3f\t%.3f\n', ...
+        Efull.name, blocktype, meanrms, meanR, meanP);
 end
