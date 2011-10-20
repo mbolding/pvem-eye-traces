@@ -1,0 +1,153 @@
+
+R version 2.13.2 Patched (2011-09-30 r57123)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> Loading required package: DeducerExtras
+Loading required package: Deducer
+Loading required package: rJava
+Loading required package: ggplot2
+Loading required package: reshape
+Loading required package: plyr
+
+Attaching package: 'reshape'
+
+The following object(s) are masked from 'package:plyr':
+
+    rename, round_any
+
+Loading required package: grid
+Loading required package: proto
+Loading required package: JGR
+Loading required package: JavaGD
+Loading required package: iplots
+starting httpd help server ... done
+Loading required package: car
+Loading required package: MASS
+Loading required package: nnet
+Loading required package: survival
+Loading required package: splines
+Loading required package: multcomp
+Loading required package: mvtnorm
+Loading required package: effects
+Loading required package: lattice
+Loading required package: nlme
+Loading required package: colorspace
+
+Attaching package: 'effects'
+
+The following object(s) are masked from 'package:car':
+
+    Prestige
+
+The following object(s) are masked from 'package:datasets':
+
+    Titanic
+
+Loading required package: foreign
+
+
+Attaching package: 'Deducer'
+
+The following object(s) are masked from 'package:stats':
+
+    summary.lm
+
+> setwd("/Users/schizophrenia/Documents")
+> setwd("/Users/schizophrenia/Documents/work/wip/pvem eye traces")
+> ls()
+[1] "pkg"
+> dir()
+ [1] "11dec2010"                "PVEMresults20oct2011.txt"
+ [3] "convert_data.m"           "edfs"                    
+ [5] "events"                   "figure1.pdf"             
+ [7] "fixpointtemp.txt"         "get_traces.m"            
+ [9] "mats"                     "plot_traces.m"           
+[11] "plot_traces2.m"           "process_data.m"          
+[13] "samples"                  "sep_traces.m"            
+[15] "temp.asc"                
+> PVEMresults20oct2011 <- read.table("/Users/schizophrenia/Documents/work/wip/pvem eye traces/PVEMresults20oct2011.txt",header=T,sep="\t",quote="")
+> PVEMresults20oct2011[,1]<-as.character(PVEMresults20oct2011[,1])
+> PVEMresults20oct2011[,1]<-as.character(PVEMresults20oct2011[,1])
+> dput(PVEMresults20oct2011,'/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemresults.robj')
+> dev.new()
+> ggplot() +
++ geom_boxplot(aes(y = q,x = target),data=PVEMresults20oct2011,position = position_dodge(width = 0.9))
+> descriptive.table(d(q),target,PVEMresults20oct2011,func.names =c("Mean","St. Deviation","Valid N"))
+$`strata: CSM `
+         Mean.q St. Deviation.q       Valid N.q 
+      0.8468571       0.2576601     665.0000000 
+
+$`strata: sol `
+         Mean.q St. Deviation.q       Valid N.q 
+      0.8405306       0.2619017     735.0000000 
+
+> print(two.sample.test(formula=d(q) ~ target,
++ data=PVEMresults20oct2011,
++ test=t.test,
++ alternative="two.sided")
++ )
+                            Welch Two Sample t-test                              
+  mean of CSM mean of sol  Difference 95% CI Lower 95% CI Upper         t
+q   0.8468571   0.8405306 0.006326531  -0.02093692   0.03358998 0.4552099
+        df   p-value
+q 1388.233 0.6490294
+  HA: two.sided 
+  H0:  difference in means = 0 
+> descriptive.table(vars = d(q),data= PVEMresults20oct2011,
++ func.names =c("Mean","St. Deviation","Valid N","Median","25th Percentile","75th Percentile","Minimum","Maximum","Skew",
++ "Kurtosis"))
+$`strata: all cases `
+               Mean.q       St. Deviation.q             Valid N.q 
+            0.8435357             0.2598221          1400.0000000 
+             Median.q 25th Percentile.q.25% 75th Percentile.q.75% 
+            0.9600000             0.8400000             0.9900000 
+            Minimum.q             Maximum.q                Skew.q 
+            0.0000000             1.0000000            -2.2446366 
+           Kurtosis.q 
+            4.1293024 
+
+> pvem.goodQ<-subset(PVEMresults20oct2011,q > .80)
+> dput(pvem.goodQ,'/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemGoodQ.robj')
+> stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+dev.new()
+> ggplot() +
++ geom_histogram(aes(y = ..count..,x = q),data=pvem.goodQ,binwidth = 0.01)
+> pvem.goodQ<-subset(PVEMresults20oct2011,q > .95)
+> dput(pvem.goodQ,'/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemGoodQ.robj')
+> dev.new()
+> ggplot() +
++ geom_boxplot(aes(y = q,x = target),data=pvem.goodQ,position = position_dodge(width = 0.9))
+> dev.new()
+> ggplot() +
++ geom_boxplot(aes(y = q,x = task),data=pvem.goodQ,position = position_dodge(width = 0.9))
+> k.sample.test(formula=d(q) ~ task,
++ data=pvem.goodQ,
++ test=oneway.test)
+            One-way analysis of means (not assuming equal variances)             
+        F (num df,denom df)     p-value
+q 4.45496       (4,370.959) 0.001578818
+> dev.new()
+> ggplot() +
++ geom_boxplot(aes(y = rms,x = target),data=pvem.goodQ,position = position_dodge(width = 0.9)) +
++ facet_wrap(facets = ~task, nrow = 1, ncol = 5)
+> dev.new()
+> ggplot() +
++ geom_boxplot(aes(y = r,x = target),data=pvem.goodQ,position = position_dodge(width = 0.9)) +
++ facet_wrap(facets = ~task, nrow = 1, ncol = 5)

@@ -2,3 +2,5 @@
 *.edf
 *.mat
 *.pdf
+*.pages
+*.robj

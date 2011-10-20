@@ -1,9 +1,10 @@
-function sep_traces(Efull)
+function s = sep_traces(Efull)
 % sep runs into blocks and plot them
 clf
 %% calc block size
 blocksize = diff(Efull.block.t);
-blocksize = blocksize(1); % block size in seconds
+blockdelay = blocksize(1) * 0.01;
+blocksize = blocksize(1) * 0.97; % block size in seconds, cut off a bit at end
 blocksizeE = find(Efull.t>blocksize,1,'first'); % block size in idx
 blocksizeT = find(Efull.T.t>blocksize,1,'first');
 
@@ -18,14 +19,15 @@ for idx = 1:length(Efull.block.type)
     blocktype = Efull.block.type{idx};
     subplot(4,5,idx)
     %% break data into blocks
-    blockRangeE = (1:blocksizeE) + find(Efull.t>Efull.block.t(idx),1,'first');
-    blockRangeT = (1:blocksizeT) + find(Efull.T.t>Efull.block.t(idx),1,'first');
+    blockstart = Efull.block.t(idx) + blockdelay;
+    blockRangeE = (1:blocksizeE) + find(Efull.t>blockstart,1,'first');
+    blockRangeT = (1:blocksizeT) + find(Efull.T.t>blockstart,1,'first');
     
     E.t = Efull.t(blockRangeE);
     E.t = E.t - E.t(1);
     E.R.x = Efull.R.x(blockRangeE);
     E.L.x = Efull.L.x(blockRangeE);
-    
+
     E.T.t = Efull.T.t(blockRangeT);
     E.T.t = E.T.t - E.T.t(1);
     E.T.x = Efull.T.x(blockRangeT);
@@ -60,8 +62,13 @@ for idx = 1:length(Efull.block.type)
     blockidx = results.(blocktype).idx + 1;
     results.(blocktype).idx = blockidx;
     
+    % data quality
+    qual = sum(~isnan(E.V.x))/length(E.V.x);
+    results.(blocktype).qual(blockidx) = qual;
+    
     % rms error
-    results.(blocktype).rms(blockidx) = sqrt(nanmean((E.T.xx - E.C.sx).^2));
+    rms = sqrt(nanmean((E.T.xx - E.C.sx).^2));
+    results.(blocktype).rms(blockidx) = rms;
     
     % correlation coef and p
     E.C.sxn = E.C.sx;
@@ -96,16 +103,20 @@ for idx = 1:length(Efull.block.type)
     Xrng = [0 20];
     xlim(Xrng)
     drawnow
-    title(blocktype)
+    title(sprintf('%.2f, %.1f, %.2f, %.2f', ...
+        qual, rms, r(2), p(2)));
 end
 
 %% print results
-fprintf('run_name\ttype\tmeanRMS\tmeanR\tmeanP\n');
+% fprintf('run_name\tstim\ttype\tmeanRMS\tmeanR\tmeanP\tmeanQ\n');
+s = '';
 for idx = 1:length(blocktypes)
     blocktype = blocktypes{idx};
     meanrms = mean(results.(blocktype).rms);
     meanR = mean(abs(results.(blocktype).r));
     meanP = mean(results.(blocktype).p);
-    fprintf('%s\t%s\t%.3f\t%.3f\t%.3f\n', ...
-        Efull.name, blocktype, meanrms, meanR, meanP);
+    meanQ = mean(results.(blocktype).qual);
+    s = [s sprintf('%-11s\t%s\t%s\t%.3f\t%.3f\t%.3f\t%.2f\n', ...
+        Efull.name, Efull.stim(1:3), blocktype, meanrms, meanR, meanP, meanQ)];
+%     fprintf(s);
 end
