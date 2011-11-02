@@ -1,6 +1,5 @@
 function E = get_traces(filename)
-% E = get_traces(filename)
-% loads traces from converted eyelink edf files
+% loads traces from converted eyelink asc files, plot and save as .mat
 % assumes samples are in 'samples' subdir
 % assumes events are in 'events' subdir
 % needs shell commands so should run on osx or linux, but will need mods 

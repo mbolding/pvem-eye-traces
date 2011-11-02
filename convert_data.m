@@ -1,4 +1,6 @@
 function convert_data()
+% convert all data using get_traces.m
+
 clf
 datafiles = dir('events/*.asc');
 numfiles = length(datafiles);

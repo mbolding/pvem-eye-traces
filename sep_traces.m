@@ -1,5 +1,5 @@
 function s = sep_traces(Efull)
-% sep runs into blocks and plot them
+% sep runs into blocks, analyze, and plot them
 clf
 %% calc block size
 blocksize = diff(Efull.block.t);
@@ -9,15 +9,17 @@ blocksizeE = find(Efull.t>blocksize,1,'first'); % block size in idx
 blocksizeT = find(Efull.T.t>blocksize,1,'first');
 
 %% setup results structure
+numblocks = length(Efull.block.type);
 blocktypes = sort(unique(Efull.block.type));
-for idx = 1:length(blocktypes)
+numblocktypes = length(blocktypes);
+for idx = 1:numblocktypes
     results.(blocktypes{idx}).idx = 0;
 end
+numrepeats = numblocks/numblocktypes;
 
 %% analyze each block
 for idx = 1:length(Efull.block.type)
     blocktype = Efull.block.type{idx};
-    subplot(4,5,idx)
     %% break data into blocks
     blockstart = Efull.block.t(idx) + blockdelay;
     blockRangeE = (1:blocksizeE) + find(Efull.t>blockstart,1,'first');
@@ -37,7 +39,7 @@ for idx = 1:length(Efull.block.type)
     E.C.x = (E.R.x + E.L.x)/2;
     
     %% filter data
-    sm = 10;
+    sm = 50;
     switch(blocktype)
         case {'fix','sacc','spem'}
             E.C.sx = smooth(E.C.x,sm,'moving');
@@ -45,7 +47,20 @@ for idx = 1:length(Efull.block.type)
         case {'vergtr','vergst'}
             E.V.sx = smooth(E.V.x,sm,'moving');
 %             fprintf('%f %f %f %f %s\n' , min(E.t), max(E.t), min(E.V.sx), max(E.V.sx), Efull.block.type{idx})    
-%             E.V.sx = smooth(E.V.x,0.05,'loess'); % slow but nice.
+%             E.V.sx = smooth(E.V.x,0.01,'rlowess'); % slow but nice.
+%             E.V.sx = smooth(E.V.x,sm,'sgolay'); % slow but nice.
+    end
+    
+    %% flipped display :(
+    if any(cell2mat(strfind({'734560','734595','734596','734602','734603'},Efull.name(1:6))))
+        E.flipped = true;
+        switch(blocktype)
+            case {'fix','sacc','spem'}
+            case {'vergtr','vergst'}
+                E.T.x = -E.T.x;
+        end
+    else
+        E.flipped = false;
     end
     
     %% interp target motion to match eye trace sample rate
@@ -67,7 +82,7 @@ for idx = 1:length(Efull.block.type)
     results.(blocktype).qual(blockidx) = qual;
     
     % rms error
-    rms = sqrt(nanmean((E.T.xx - E.C.sx).^2));
+    rms = sqrt(nanmean((E.T.xx - E.C.sx).^2))/2;
     results.(blocktype).rms(blockidx) = rms;
     
     % correlation coef and p
@@ -89,6 +104,7 @@ for idx = 1:length(Efull.block.type)
     end
     
     %% plot data
+    subplot(numrepeats,numblocktypes,idx)
     switch(blocktype)
         case {'fix','sacc','spem'}
             Yrng = [-12 12];
@@ -102,10 +118,13 @@ for idx = 1:length(Efull.block.type)
     ylim(Yrng)
     Xrng = [0 20];
     xlim(Xrng)
-    drawnow
     title(sprintf('%.2f, %.1f, %.2f, %.2f', ...
-        qual, rms, r(2), p(2)));
+        qual, rms, r(2), p(2)),'FontSize',8);
+    drawnow
 end
+
+axes('Position',[0.2 0.03 0.6 0.05],'Xlim',[0 1],'Ylim',[0 1],'Visible','off');
+text(0.5,0.5,[ Efull.name '  ' Efull.stim ])
 
 %% print results
 % fprintf('run_name\tstim\ttype\tmeanRMS\tmeanR\tmeanP\tmeanQ\n');

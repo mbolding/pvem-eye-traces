@@ -1,0 +1,169 @@
+
+R version 2.13.2 Patched (2011-09-30 r57123)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> Loading required package: DeducerExtras
+Loading required package: Deducer
+Loading required package: rJava
+Loading required package: ggplot2
+Loading required package: reshape
+Loading required package: plyr
+
+Attaching package: 'reshape'
+
+The following object(s) are masked from 'package:plyr':
+
+    rename, round_any
+
+Loading required package: grid
+Loading required package: proto
+Loading required package: JGR
+Loading required package: JavaGD
+Loading required package: iplots
+starting httpd help server ... done
+Loading required package: car
+Loading required package: MASS
+Loading required package: nnet
+Loading required package: survival
+Loading required package: splines
+Loading required package: multcomp
+Loading required package: mvtnorm
+Loading required package: effects
+Loading required package: lattice
+Loading required package: nlme
+Loading required package: colorspace
+
+Attaching package: 'effects'
+
+The following object(s) are masked from 'package:car':
+
+    Prestige
+
+The following object(s) are masked from 'package:datasets':
+
+    Titanic
+
+Loading required package: foreign
+
+
+Attaching package: 'Deducer'
+
+The following object(s) are masked from 'package:stats':
+
+    summary.lm
+
+> setwd("/Users/schizophrenia/Documents/work/wip/pvem eye traces")
+> pvemGoodQ <- dget('/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemGoodQ.robj')
+> stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+rm(pvemGoodQ)
+> pvemresults2 <- dget('/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemresults2.robj')
+> pvem.goodQ<-subset(pvemresults2,q >= .095)
+> str(pvemresults2)
+'data.frame':	1400 obs. of  7 variables:
+ $ run   : chr  "734462.5639" "734462.5639" "734462.5639" "734462.5639" ...
+ $ target: Factor w/ 2 levels "CSM","sol": 2 2 2 2 2 2 2 2 2 2 ...
+ $ task  : Factor w/ 5 levels "fix","sacc","spem",..: 1 2 3 4 5 1 2 3 4 5 ...
+ $ rms   : num  0.151 1.895 1.937 3.543 3.552 ...
+ $ r     : num  0 0.744 0.85 0.048 0.022 0 0.728 0.861 0.175 0.109 ...
+ $ p     : num  1 0 0 0 0.135 1 0 0 0 0.088 ...
+ $ q     : num  1 0.99 0.97 0.99 1 1 1 0.98 1 1 ...
+> str(pvem.goodQ)
+'data.frame':	1320 obs. of  7 variables:
+ $ run   : chr  "734462.5639" "734462.5639" "734462.5639" "734462.5639" ...
+ $ target: Factor w/ 2 levels "CSM","sol": 2 2 2 2 2 2 2 2 2 2 ...
+ $ task  : Factor w/ 5 levels "fix","sacc","spem",..: 1 2 3 4 5 1 2 3 4 5 ...
+ $ rms   : num  0.151 1.895 1.937 3.543 3.552 ...
+ $ r     : num  0 0.744 0.85 0.048 0.022 0 0.728 0.861 0.175 0.109 ...
+ $ p     : num  1 0 0 0 0.135 1 0 0 0 0.088 ...
+ $ q     : num  1 0.99 0.97 0.99 1 1 1 0.98 1 1 ...
+> 1320/1400
+[1] 0.9428571
+> dev.new()
+Warning messages:
+1: Removed 41 rows containing missing values (stat_boxplot). 
+2: Removed 41 rows containing missing values (stat_boxplot). 
+3: Removed 5 rows containing missing values (stat_boxplot). 
+4: Removed 36 rows containing missing values (stat_boxplot). 
+5: Removed 9 rows containing missing values (stat_boxplot). 
+6: Removed 8 rows containing missing values (stat_boxplot). 
+7: Removed 8 rows containing missing values (stat_boxplot). 
+8: Removed 7 rows containing missing values (stat_boxplot). 
+9: Removed 9 rows containing missing values (stat_boxplot). 
+> ggplot() +
++ geom_boxplot(aes(y = rms,x = target),data=pvem.goodQ,position = position_dodge(width = 0.9)) +
++ facet_wrap(facets = ~task, nrow = 1, ncol = 5)
+Warning messages:
+1: Removed 9 rows containing missing values (stat_boxplot). 
+2: Removed 8 rows containing missing values (stat_boxplot). 
+3: Removed 8 rows containing missing values (stat_boxplot). 
+4: Removed 7 rows containing missing values (stat_boxplot). 
+5: Removed 9 rows containing missing values (stat_boxplot). 
+> dput(pvem.goodQ,'/Users/schizophrenia/Documents/work/wip/pvem eye traces/pvemGoodQ2.robj')
+> pvem.goodQandP<-subset(pvem.goodQ,p <= 0.05)
+Warning messages:
+1: Removed 9 rows containing missing values (stat_boxplot). 
+2: Removed 8 rows containing missing values (stat_boxplot). 
+3: Removed 8 rows containing missing values (stat_boxplot). 
+4: Removed 7 rows containing missing values (stat_boxplot). 
+5: Removed 9 rows containing missing values (stat_boxplot). 
+6: Removed 41 rows containing missing values (stat_boxplot). 
+> str(pvem.goodQ)
+'data.frame':	1320 obs. of  7 variables:
+ $ run   : chr  "734462.5639" "734462.5639" "734462.5639" "734462.5639" ...
+ $ target: Factor w/ 2 levels "CSM","sol": 2 2 2 2 2 2 2 2 2 2 ...
+ $ task  : Factor w/ 5 levels "fix","sacc","spem",..: 1 2 3 4 5 1 2 3 4 5 ...
+ $ rms   : num  0.151 1.895 1.937 3.543 3.552 ...
+ $ r     : num  0 0.744 0.85 0.048 0.022 0 0.728 0.861 0.175 0.109 ...
+ $ p     : num  1 0 0 0 0.135 1 0 0 0 0.088 ...
+ $ q     : num  1 0.99 0.97 0.99 1 1 1 0.98 1 1 ...
+> str(pvem.goodQandP)
+'data.frame':	841 obs. of  7 variables:
+ $ run   : chr  "734462.5639" "734462.5639" "734462.5639" "734462.57" ...
+ $ target: Factor w/ 2 levels "CSM","sol": 2 2 2 2 2 2 2 2 2 2 ...
+ $ task  : Factor w/ 5 levels "fix","sacc","spem",..: 2 3 4 2 3 4 2 3 5 2 ...
+ $ rms   : num  1.9 1.94 3.54 1.94 1.87 ...
+ $ r     : num  0.744 0.85 0.048 0.728 0.861 0.175 0.729 0.836 0.195 0.698 ...
+ $ p     : num  0 0 0 0 0 0 0 0 0 0 ...
+ $ q     : num  0.99 0.97 0.99 1 0.98 1 0.99 0.97 0.99 0.97 ...
+> 841/1320
+[1] 0.6371212
+> stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+pvem.vGoodQ<-subset(pvemresults2,q >= 0.99)
+Warning messages:
+1: Removed 9 rows containing missing values (stat_boxplot). 
+2: Removed 8 rows containing missing values (stat_boxplot). 
+3: Removed 8 rows containing missing values (stat_boxplot). 
+4: Removed 7 rows containing missing values (stat_boxplot). 
+5: Removed 9 rows containing missing values (stat_boxplot). 
+6: Removed 9 rows containing missing values (stat_boxplot). 
+7: Removed 8 rows containing missing values (stat_boxplot). 
+8: Removed 8 rows containing missing values (stat_boxplot). 
+9: Removed 7 rows containing missing values (stat_boxplot). 
+10: Removed 9 rows containing missing values (stat_boxplot). 
+> stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.

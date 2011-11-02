@@ -1,4 +1,5 @@
 function plot_traces(E)
+% plot a run of data, load data with get_traces.
 
 %% smooth data
 E.L.sx = smooth(E.L.x,100,'moving');
